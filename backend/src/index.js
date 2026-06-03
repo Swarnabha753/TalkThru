@@ -11,7 +11,7 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { app, server } from "./lib/socket.js";
 
-import "./lib/redis.js";
+import { connectRedis } from "./lib/redis.js";
 
 dotenv.config();
 
@@ -39,7 +39,9 @@ if (process.env.NODE_ENV === "production") {
 
 
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log("server is listening on PORT:" + PORT);
-    connectDB();
+
+    await connectRedis();
+    await connectDB();
 });
