@@ -1,5 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
+
 import {
     getUsersForSidebar,
     getMessages,
@@ -9,13 +10,11 @@ import {
     getLastSeen,
 } from "../controllers/message.controller.js";
 
-
-
 const router = express.Router();
 
 router.get("/users", protectRoute, getUsersForSidebar);
 
-router.get("/unread", protectRoute,getAllUnreadCounts);
+router.get("/unread", protectRoute, getAllUnreadCounts);
 
 router.get("/unread/:senderId", protectRoute, getUnreadCount);
 

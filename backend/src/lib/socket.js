@@ -1,7 +1,8 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
-import redisClient from "./redis.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { pubClient, subClient } from "./redis.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -10,8 +11,12 @@ const io = new Server(server, {
     cors: {origin: ["http://localhost:5173"]},
 });
 
+io.adapter(createAdapter(pubClient, subClient));
+
+console.log("Redis Adapter Enabled");
+
 export async function getReceiverSocketId(userId) {
-    return await redisClient.hGet("onlineUsers", userId);
+    return await pubClient.hGet("onlineUsers", userId);
 }
 
 io.on("connection", async (socket) => {
@@ -20,10 +25,10 @@ io.on("connection", async (socket) => {
         const userId = socket.handshake.query.userId;
 
         if (userId) {
-            await redisClient.hSet("onlineUsers", userId.toString(), socket.id);
+            await pubClient.hSet("onlineUsers", userId.toString(), socket.id);
         }
 
-        const onlineUsers = await redisClient.hKeys("onlineUsers");
+        const onlineUsers = await pubClient.hKeys("onlineUsers");
 
         io.emit("getOnlineUsers", onlineUsers);
 
@@ -31,10 +36,10 @@ io.on("connection", async (socket) => {
                 try {
                     console.log("A user disconnected", socket.id);
                     if (userId) {
-                        await redisClient.set(`lastSeen:${userId}`,Date.now());
-                        await redisClient.hDel("onlineUsers",userId.toString());
+                        await pubClient.set(`lastSeen:${userId}`,Date.now());
+                        await pubClient.hDel("onlineUsers",userId.toString());
                     }
-                    const onlineUsers = await redisClient.hKeys("onlineUsers");
+                    const onlineUsers = await pubClient.hKeys("onlineUsers");
 
                     io.emit("getOnlineUsers",onlineUsers);
                 } catch (error) {

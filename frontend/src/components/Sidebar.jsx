@@ -5,7 +5,15 @@ import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
 
 const Sidebar = () => {
-  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
+  const {
+  getUsers,
+  users,
+  selectedUser,
+  setSelectedUser,
+  isUsersLoading,
+  unreadCounts,
+  getUnreadCounts,
+} = useChatStore();
 
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -13,6 +21,10 @@ const Sidebar = () => {
   useEffect(() => {
     getUsers();
   }, [getUsers]);
+
+  useEffect(() => {
+  getUnreadCounts();
+}, []);
 
   const filteredUsers = showOnlineOnly
     ? users.filter((user) => onlineUsers.includes(user._id))
@@ -68,12 +80,25 @@ const Sidebar = () => {
             </div>
 
             {/* User info - only visible on larger screens */}
-            <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">{user.fullName}</div>
-              <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
-              </div>
-            </div>
+            <div className="hidden lg:block text-left min-w-0 flex-1">
+  <div className="flex justify-between items-center">
+    <div className="font-medium truncate">
+      {user.fullName}
+    </div>
+
+    {Number(unreadCounts[user._id]) > 0 && (
+  <span className="badge badge-error badge-sm">
+    {Number(unreadCounts[user._id])}
+  </span>
+    )}
+  </div>
+
+  <div className="text-sm text-zinc-400">
+    {onlineUsers.includes(user._id)
+      ? "Online"
+      : "Offline"}
+  </div>
+</div>
           </button>
         ))}
 

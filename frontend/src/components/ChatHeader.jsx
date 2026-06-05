@@ -1,10 +1,28 @@
 import { X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import { useEffect } from "react";
 
 const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
+  const {
+  selectedUser,
+  setSelectedUser,
+  lastSeen,
+  getLastSeen,
+} = useChatStore();
   const { onlineUsers } = useAuthStore();
+
+  useEffect(() => {
+  if (selectedUser?._id) {
+    getLastSeen(selectedUser._id);
+  }
+}, [selectedUser]);
+
+const formatLastSeen = (timestamp) => {
+  if (!timestamp) return "Offline";
+
+  return new Date(Number(timestamp)).toLocaleString();
+};
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -21,7 +39,11 @@ const ChatHeader = () => {
           <div>
             <h3 className="font-medium">{selectedUser.fullName}</h3>
             <p className="text-sm text-base-content/70">
-              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+                {onlineUsers.includes(selectedUser._id)
+                ? "Online"
+                : `Last seen ${formatLastSeen(
+                    lastSeen[selectedUser._id]
+                )}`}
             </p>
           </div>
         </div>
