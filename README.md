@@ -70,23 +70,45 @@ A scalable real-time chat application built using the MERN stack, Socket.IO, Red
 
 ## Architecture
 
-Frontend (React)  //
-        │
-        ▼
-Backend (Node + Express)  //
-        │
-        ├── MongoDB (User & Message Storage)  //
-        │
-        ├── Redis //
-        │      ├── Online Users//
-        │      ├── Last Seen//
-        │      └── Unread Counts//
-        │
-        └── Socket.IO//
-               │
-               └── Redis Adapter//
-                      │
-                Multiple Instances//
+```text
+┌──────────────────────────┐
+│      React Frontend      │
+│  Tailwind + Zustand      │
+└─────────────┬────────────┘
+              │
+              │ HTTP + WebSocket
+              ▼
+┌──────────────────────────┐
+│   Node.js + Express.js   │
+│      REST APIs           │
+└───────┬────────┬─────────┘
+        │        │
+        │        │
+        ▼        ▼
+┌────────────┐  ┌──────────────┐
+│  MongoDB   │  │    Redis     │
+│ Users &    │  │ Online Users │
+│ Messages   │  │ Last Seen    │
+└────────────┘  │ Unread Count │
+                └──────┬───────┘
+                       │
+                       ▼
+            ┌──────────────────┐
+            │ Socket.IO Server │
+            └────────┬─────────┘
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │ Socket.IO Redis      │
+          │ Adapter (Pub/Sub)    │
+          └────────┬─────────────┘
+                   │
+                   ▼
+      ┌─────────────────────────────┐
+      │ Multiple Server Instances   │
+      │ Horizontal Scaling Support  │
+      └─────────────────────────────┘
+```
 
 ---
 
